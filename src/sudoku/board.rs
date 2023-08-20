@@ -1,8 +1,7 @@
-use std::{fmt, str};
-use super::errors::*;
 use super::collection::*;
+use super::errors::*;
 use super::tile::*;
-
+use std::{fmt, str};
 
 #[derive(Clone, Debug)]
 pub struct Board {
@@ -10,27 +9,47 @@ pub struct Board {
 }
 
 impl Board {
+	pub fn new() -> Board {
+		Board { board: Vec::new() }
+	}
 	pub fn get_board(&self) -> &Vec<Tile> {
 		&self.board
 	}
 
 	pub fn get_row(&self, index: usize) -> Result<SudokuCollection, BoardOutOfBounds> {
 		match index < 9 {
-			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&Tile>>())),
+			true => Ok(SudokuCollection::from(
+				self.board
+					.iter()
+					.skip(index * 9)
+					.take(9)
+					.collect::<Vec<&Tile>>(),
+			)),
 			false => Err(BoardOutOfBounds),
 		}
 	}
-	
-	fn get_row_private(&self, index: usize) -> Result<Vec<&Tile>, BoardOutOfBounds>{
+
+	fn get_row_private(&self, index: usize) -> Result<Vec<&Tile>, BoardOutOfBounds> {
 		match index < 9 {
-			true => Ok(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&Tile>>()),
+			true => Ok(self
+				.board
+				.iter()
+				.skip(index * 9)
+				.take(9)
+				.collect::<Vec<&Tile>>()),
 			false => Err(BoardOutOfBounds),
 		}
 	}
 
 	pub fn get_col(&self, index: usize) -> Result<SudokuCollection, BoardOutOfBounds> {
 		match index < 9 {
-			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index).step_by(9).collect::<Vec<&Tile>>())),
+			true => Ok(SudokuCollection::from(
+				self.board
+					.iter()
+					.skip(index)
+					.step_by(9)
+					.collect::<Vec<&Tile>>(),
+			)),
 			false => Err(BoardOutOfBounds),
 		}
 	}
@@ -49,6 +68,26 @@ impl Board {
 			}
 			false => Err(BoardOutOfBounds),
 		}
+	}
+
+	pub fn get_tile(&self, x: usize, y: usize) -> Result<&Tile, BoardOutOfBounds> {
+		match x < 9 && y < 9 {
+			true => Ok(&self.board[y + x * 9]),
+			false => Err(BoardOutOfBounds),
+		}
+	}
+
+	pub fn get_tile_mut(&mut self, x: usize, y: usize) -> Result<&mut Tile, BoardOutOfBounds> {
+		match x < 9 && y < 9 {
+			true => Ok(self.board.get_mut(x + y * 9).unwrap()),
+			false => Err(BoardOutOfBounds),
+		}
+	}
+
+	pub fn is_solved(&self) -> bool {
+		self.board
+			.iter()
+			.fold(true, |solved, tile| solved && tile.get_number().is_some())
 	}
 }
 

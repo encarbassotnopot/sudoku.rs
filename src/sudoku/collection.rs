@@ -18,10 +18,10 @@ impl<'a> From<Vec<&'a Tile>> for SudokuCollection<'a> {
 
 impl SudokuCollection<'_> {
 	pub fn get_candidates(&self) -> Vec<u8> {
-		let numbers: Vec<u8> = self.collection.iter().filter_map(|t| t.get_number()).collect();
+		let numbers: Vec<u8> = self.collection.iter().filter_map(|t| *t.get_number()).collect();
 		let mut candidates = Vec::new();
 
-		for i in (1..9) {
+		for i in (1..10) {
 			if !numbers.contains(&i) {
 				candidates.push(i)
 			}

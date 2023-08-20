@@ -1,35 +1,36 @@
 use std::{fmt, str};
 use super::errors::*;
 use super::collection::*;
+use super::tile::*;
 
 
 #[derive(Clone, Debug)]
 pub struct Board {
-	board: Vec<u8>,
+	board: Vec<Tile>,
 }
 
 impl Board {
-	pub fn get_board(&self) -> &Vec<u8> {
+	pub fn get_board(&self) -> &Vec<Tile> {
 		&self.board
 	}
 
 	pub fn get_row(&self, index: usize) -> Result<SudokuCollection, BoardOutOfBounds> {
 		match index < 9 {
-			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&u8>>())),
+			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&Tile>>())),
 			false => Err(BoardOutOfBounds),
 		}
 	}
 	
-	fn get_row_private(&self, index: usize) -> Result<Vec<&u8>, BoardOutOfBounds>{
+	fn get_row_private(&self, index: usize) -> Result<Vec<&Tile>, BoardOutOfBounds>{
 		match index < 9 {
-			true => Ok(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&u8>>()),
+			true => Ok(self.get_board().iter().skip(index * 9).take(9).collect::<Vec<&Tile>>()),
 			false => Err(BoardOutOfBounds),
 		}
 	}
 
 	pub fn get_col(&self, index: usize) -> Result<SudokuCollection, BoardOutOfBounds> {
 		match index < 9 {
-			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index).step_by(9).collect::<Vec<&u8>>())),
+			true => Ok(SudokuCollection::from(self.get_board().iter().skip(index).step_by(9).collect::<Vec<&Tile>>())),
 			false => Err(BoardOutOfBounds),
 		}
 	}
@@ -37,7 +38,7 @@ impl Board {
 	pub fn get_3x3(&self, x: usize, y: usize) -> Result<SudokuCollection, BoardOutOfBounds> {
 		match x < 3 && y < 3 {
 			true => {
-				let mut col: Vec<&u8> = Vec::new();
+				let mut col: Vec<&Tile> = Vec::new();
 				for i in (0..3) {
 					for j in (0..3) {
 						col.push(self.get_row_private(y * 3 + i)?.get(x * 3 + j).unwrap())
@@ -61,8 +62,8 @@ impl str::FromStr for Board {
 
 		let sdk = s
 			.chars()
-			.map(|num| num.to_digit(10).unwrap() as u8)
-			.collect::<Vec<u8>>();
+			.map(|num| Tile::new(num.to_digit(10).unwrap() as u8))
+			.collect::<Vec<Tile>>();
 
 		Ok(Self { board: sdk })
 	}
@@ -86,11 +87,7 @@ impl fmt::Display for Board {
 			let mut line = THICK.to_string();
 			row.iter().enumerate().for_each(|(r_idx, el)| {
 				line += " ";
-				if el.clone() != 0 {
-					line += &el.to_string();
-				} else {
-					line += " ";
-				}
+				line += &el.to_string();
 				line += " ";
 
 				if (r_idx + 1) % 3 == 0 {
